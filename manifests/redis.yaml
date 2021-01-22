@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: haste
+  name: redis
+  namespace: haste
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haste
+  template:
+    metadata:
+      labels:
+        app: haste
+    spec:
+      containers:
+        - image: arm32v7/redis:6.0-alpine
+          name: redis
+          resources:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: haste
+  name: redis
+  namespace: haste
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  selector:
+    app: haste

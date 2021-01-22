@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: haste
+  name: haste
+  namespace: haste
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haste
+  template:
+    metadata:
+      labels:
+        app: haste
+    spec:
+      containers:
+        - image: registry.trtl.dev/haste-server-arm:latest
+          name: haste-server-arm
+          env:
+            - name: "PORT"
+              value: "8000"
+            - name: "STORAGE_HOST"
+              value: "redis"
+            - name: "STORAGE_TYPE"
+              value: "redis"
+            - name: "STORAGE_PORT"
+              value: "6379"
+          resources:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: haste
+  name: haste
+  namespace: haste
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+  selector:
+    app: haste
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/acme-challenge-type: http01
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+    nginx.ingress.kubernetes.io/auth-tls-secret: default/private-ca-secret
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    nginx.ingress.kubernetes.io/redirect-entry-point: https
+  name: ingress
+  namespace: haste
+spec:
+  rules:
+    - host: haste.trtl.dev
+      http:
+        paths:
+          - backend:
+              service:
+                name: haste
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - haste.trtl.dev
+      secretName: haste.trtl.dev-tls

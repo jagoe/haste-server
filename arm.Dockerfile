@@ -1,3 +1,5 @@
+FROM hypriot/rpi-alpine as rpi
+
 FROM node:14.8-stretch as builder
 
 RUN mkdir -p /app && chown node:node /app
@@ -14,7 +16,9 @@ RUN npm install && \
     aws-sdk@2.738.0 \
     rethinkdbdash@2.3.31
 
-FROM node:14.8-alpine
+FROM arm32v7/node:14.8-alpine
+
+COPY --from=rpi ["/usr/bin/qemu-arm-static", "/usr/bin/qemu-arm-static"]
 
 RUN mkdir -p /app && chown node:node /app
 USER node:node

@@ -1,17 +1,26 @@
-version: '3.0'
+version: "3.0"
 services:
-  haste-server:
+  haste-server-file:
     build: .
     networks:
       - db-network
     environment:
-      - STORAGE_TYPE=memcached
-      - STORAGE_HOST=memcached
-      - STORAGE_PORT=11211
+      - STORAGE_TYPE=file
+      - STORAGE_FILEPATH=/app/_storage
     ports:
-      - 7777:7777
-  memcached:
-    image: memcached:latest
+      - 7770:7777
+  haste-server-redis:
+    build: .
+    networks:
+      - db-network
+    environment:
+      - STORAGE_TYPE=redis
+      - STORAGE_HOST=redis
+      - STORAGE_PORT=6379
+    ports:
+      - 7771:7777
+  redis:
+    image: redis:latest
     networks:
       - db-network
 

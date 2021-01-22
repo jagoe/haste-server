@@ -4,3 +4,9 @@ node_modules
 *.swo
 data
 *.DS_Store
+
+test
+.eslint*
+
+*Dockerfile
+docker-compose.yaml
